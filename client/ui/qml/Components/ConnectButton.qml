@@ -15,6 +15,16 @@ Button {
     property string progressButtonColor: AmneziaStyle.color.paleGray
     property string connectedButtonColor: AmneziaStyle.color.goldenApricot
 
+    property bool isFocusable: true
+    
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+    
     implicitWidth: 190
     implicitHeight: 190
 
