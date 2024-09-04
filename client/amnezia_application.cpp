@@ -401,7 +401,6 @@ void AmneziaApplication::initControllers()
 
     m_focusController.reset(new FocusController(m_engine, this));
     m_engine->rootContext()->setContextProperty("FocusController", m_focusController.get());
-    connect(m_pageController.get(), &PageController::goToPage, m_focusController.get(), &FocusController::reload); // TODO(Kirill Anisimov): remove it after tests
 
     m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel,
                                                     m_apiServicesModel, m_settings));
