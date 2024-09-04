@@ -31,6 +31,8 @@ signals:
 
 public slots:
     void reload();
+    void rescan();
+    void setRootItem(QObject* object);
 
 private:
     void getFocusChain();
@@ -39,6 +41,7 @@ private:
     QList<QObject*> m_focus_chain; // List of current objects to be focused
     QQuickItem* m_focused_item; // Pointer to the active focus item
     qsizetype m_focused_item_index; // Active focus item's index in focus chain
+    QQuickItem* m_root_item;
 };
 
 #endif // FOCUSCONTROLLER_H

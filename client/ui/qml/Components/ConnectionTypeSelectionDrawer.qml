@@ -44,10 +44,10 @@ DrawerType2 {
             headerText: qsTr("Add new connection")
         }
 
-        Item {
-            id: focusItem
-            KeyNavigation.tab: ip.rightButton
-        }
+        // Item {
+        //     id: focusItem
+        //     KeyNavigation.tab: ip.rightButton
+        // }
 
         LabelWithButtonType {
             id: ip
@@ -62,7 +62,7 @@ DrawerType2 {
                 root.close()
             }
 
-            KeyNavigation.tab: qrCode.rightButton
+            // KeyNavigation.tab: qrCode.rightButton
         }
 
         DividerType {}
@@ -79,7 +79,7 @@ DrawerType2 {
                 root.close()
             }
 
-            KeyNavigation.tab: focusItem
+            // KeyNavigation.tab: focusItem
         }
 
         DividerType {}

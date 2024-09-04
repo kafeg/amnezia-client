@@ -179,7 +179,7 @@ Window  {
                         hidePassword = !hidePassword
                     }
 
-                    KeyNavigation.tab: saveButton
+                    // KeyNavigation.tab: saveButton
                 }
 
                 BasicButtonType {

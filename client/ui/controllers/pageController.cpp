@@ -161,9 +161,23 @@ void PageController::setDrawerDepth(const int depth)
     }
 }
 
-int PageController::getDrawerDepth()
+int PageController::getDrawerDepth() const
 {
     return m_drawerDepth;
+}
+
+int PageController::incrementDrawerDepth()
+{
+    return ++m_drawerDepth;
+}
+
+int PageController::decrementDrawerDepth()
+{
+    if (m_drawerDepth == 0) {
+        return m_drawerDepth;
+    } else {
+        return --m_drawerDepth;
+    }
 }
 
 void PageController::onShowErrorMessage(ErrorCode errorCode)

@@ -68,6 +68,22 @@ bool isOnTheScene(QObject* object)
     return res;
 }
 
+QQuickItem* getPageOfItem(QQuickItem* item) {
+    if(!item) {
+        qWarning() << "item is null";
+        return {};
+    }
+    const auto pagePattern = QString::fromLatin1("Page");
+    QString className{item->metaObject()->className()};
+    qDebug() << "=====================>> Item: " << item << " with name: " << item->metaObject()->className();
+    const auto is_page = className.contains(pagePattern, Qt::CaseSensitive);
+    if(is_page) {
+        return item;
+    } else {
+        return getPageOfItem(item->parentItem());
+    }
+}
+
 QList<QObject*> getSubChain(QObject* item)
 {
     QList<QObject*> res;
@@ -92,8 +108,8 @@ void printItems(const T& items, QObject* current_item)
     for(const auto& item : items) {
         QQuickItem* i = qobject_cast<QQuickItem*>(item);
         QPointF coords {getItemCenterPointOnScene(i)};
-        QString prefix = current_item == i ? "==>" : "";
-        qDebug() << prefix << " Item: " << i;
+        QString prefix = current_item == i ? "==>" : "   ";
+        qDebug() << prefix << " Item: " << i << " with coords: " << coords;
     }
     qDebug() << "**********************************************";
 }
@@ -103,6 +119,7 @@ FocusController::FocusController(QQmlApplicationEngine* engine, QObject *parent)
     , m_focus_chain{}
     , m_focused_item{nullptr}
     , m_focused_item_index{-1}
+    , m_root_item{nullptr}
 {
     qDebug() << "FocusController ctor" << "triggered";
 }
@@ -164,9 +181,9 @@ void FocusController::nextKeyRightItem()
     qDebug() << "nextKeyRightItem" << "triggered";
 }
 
-void FocusController::reload()
+void FocusController::rescan()
 {
-    qDebug() << ">>>>>>>>>>>>>>>>>>>" << "reload" << "triggered";
+    qDebug() << ">>>>>>>>>>>>>>>>>>>" << "rescan" << "triggered";
 
     getFocusChain();
 
@@ -200,15 +217,23 @@ void FocusController::reload()
     m_focused_item = qobject_cast<QQuickItem*>(m_focus_chain.at(m_focused_item_index));
 
     m_focused_item->forceActiveFocus();
+
+    qDebug() << "<<<<<<<<<<<<<<<<<<" << "rescan" << "finished";
 }
 
 void FocusController::getFocusChain()
 {
-    qDebug() << ">>>>>>>>>>>>>>>>>>>" << "getFocusChain" << "triggered";
+    // qDebug() << "*****************" << "getFocusChain" << "triggered";
 
     m_focus_chain.clear();
 
-    const auto rootObjects = m_engine->rootObjects();
+    QObjectList rootObjects;
+
+    if( m_root_item ) {
+        rootObjects << m_root_item;
+    } else {
+        rootObjects = m_engine->rootObjects();
+    }
 
     if(rootObjects.empty()) {
         qWarning() << "Empty focus chain detected!";
@@ -226,4 +251,75 @@ void FocusController::getFocusChain()
     qInfo() << "New focus chain created";
 
     printItems(m_focus_chain, m_focused_item);
+}
+
+void FocusController::reload()
+{
+    qDebug() << ">>>>>>>>>>>>>>>>>>>" << "reload" << "triggered";
+    qDebug() << "*** root item: " << m_root_item;
+
+    m_focus_chain.clear();
+
+    QObjectList rootObjects;
+
+    if (m_root_item) {
+        rootObjects << qobject_cast<QObject*>(m_root_item);
+    } else {
+        rootObjects = m_engine->rootObjects();
+    }
+
+    if(rootObjects.empty()) {
+        qWarning() << "Empty focus chain detected!";
+        emit focusChainChanged();
+        return;
+    }
+
+    for(const auto object : rootObjects) {
+        m_focus_chain.append(getSubChain(object));
+    }
+
+    std::sort(m_focus_chain.begin(), m_focus_chain.end(), isLess);
+
+    printItems(m_focus_chain, m_focused_item);
+
+    emit focusChainChanged();
+
+    if (m_focus_chain.empty()) {
+        m_focused_item_index = -1;
+        qWarning() << "reloaded to empty focus chain";
+    }
+
+    QQuickWindow* window = qobject_cast<QQuickWindow*>(rootObjects[0]);
+    if (!window) {
+        window = qobject_cast<QQuickItem*>(rootObjects[0])->window();
+    }
+
+    if (!window) {
+        qCritical() << "Couldn't get the current window";
+        return;
+    }
+
+    qDebug() << "==> Active Focused Item: " << window->activeFocusItem();
+    qDebug() << "--> Active Focused Object: " << window->focusObject();
+    qDebug() << ">>> Current Focused Item: " << m_focused_item;
+
+    m_focused_item_index = m_focus_chain.indexOf(m_focused_item);
+
+    if(m_focused_item_index == -1) {
+        m_focused_item_index = 0; // if not in focus chain current
+    }
+
+    m_focused_item = qobject_cast<QQuickItem*>(m_focus_chain.at(m_focused_item_index));
+
+    m_focused_item->forceActiveFocus();
+
+    qDebug() << "<<<<<<<<<<<<<<<<<<" << "reload" << "finished";
+}
+
+void FocusController::setRootItem(QObject* object)
+{
+    if (m_root_item != qobject_cast<QQuickItem*>(object)) {
+        m_root_item = qobject_cast<QQuickItem*>(object);
+        qDebug() << "*** Root item was set to " << object;
+    }
 }

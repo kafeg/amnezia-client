@@ -19,8 +19,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     Connections {
         objectName: "pageControllerConnections"
 
@@ -45,13 +43,6 @@ PageType {
             anchors.topMargin: 34
             anchors.bottomMargin: 34
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: loggingButton.visible ?
-                                       loggingButton :
-                                       connectButton
-            }
-
             BasicButtonType {
                 id: loggingButton
                 objectName: "loggingButton"
@@ -75,8 +66,6 @@ PageType {
                 Keys.onEnterPressed: loggingButton.clicked()
                 Keys.onReturnPressed: loggingButton.clicked()
 
-                KeyNavigation.tab: connectButton
-
                 onClicked: {
                     PageController.goToPage(PageEnum.PageSettingsLogging)
                 }
@@ -88,7 +77,7 @@ PageType {
 
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignCenter
-                KeyNavigation.tab: splitTunnelingButton
+                // KeyNavigation.tab: splitTunnelingButton
             }
 
             BasicButtonType {
@@ -125,8 +114,6 @@ PageType {
                 Keys.onEnterPressed: splitTunnelingButton.clicked()
                 Keys.onReturnPressed: splitTunnelingButton.clicked()
 
-                KeyNavigation.tab: drawer
-
                 onClicked: {
                     homeSplitTunnelingDrawer.open()
                 }
@@ -138,25 +125,27 @@ PageType {
                     parent: root
 
                     onClosed: {
-                        if (!GC.isMobile()) {
-                            focusItem.forceActiveFocus()
-                        }
+                        console.log(objectName, " was closed...")
+                        // FocusController.reload()
                     }
                 }
             }
         }
     }
 
-
     DrawerType2 {
         id: drawer
-        objectName: "drawer"
+        objectName: "drawerProtocol"
 
         anchors.fill: parent
 
         onClosed: {
+            console.debug("===>> onClosed drawer")
+
             if (!GC.isMobile()) {
-                focusItem.forceActiveFocus()
+                console.log(objectName, " was closed")
+                FocusController.setRootItem(null)
+                FocusController.reload()
             }
         }
 
@@ -168,11 +157,11 @@ PageType {
             Connections {
                 target: drawer
                 enabled: !GC.isMobile()
-                function onActiveFocusChanged() {
-                    if (drawer.activeFocus && !drawer.isOpened) {
-                        collapsedButtonChevron.forceActiveFocus()
-                    }
-                }
+                // function onActiveFocusChanged() {
+                //     if (drawer.activeFocus && !drawer.isOpened) {
+                //         collapsedButtonChevron.forceActiveFocus()
+                //     }
+                // }
             }
             ColumnLayout {
                 id: collapsed
@@ -202,8 +191,8 @@ PageType {
 
                     Connections {
                         target: drawer
-                        function onEntered() {
-                            if (drawer.isCollapsed) {
+                        function onCursorEntered() {
+                            if (drawer.isCollapsedStateActive) {
                                 collapsedButtonChevron.backgroundColor = collapsedButtonChevron.hoveredColor
                                 collapsedButtonHeader.opacity = 0.8
                             } else {
@@ -211,8 +200,8 @@ PageType {
                             }
                         }
 
-                        function onExited() {
-                            if (drawer.isCollapsed) {
+                        function onCursorExited() {
+                            if (drawer.isCollapsedStateActive) {
                                 collapsedButtonChevron.backgroundColor = collapsedButtonChevron.defaultColor
                                 collapsedButtonHeader.opacity = 1
                             } else {
@@ -221,7 +210,7 @@ PageType {
                         }
 
                         function onPressed(pressed, entered) {
-                            if (drawer.isCollapsed) {
+                            if (drawer.isCollapsedStateActive) {
                                 collapsedButtonChevron.backgroundColor = pressed ? collapsedButtonChevron.pressedColor : entered ? collapsedButtonChevron.hoveredColor : collapsedButtonChevron.defaultColor
                                 collapsedButtonHeader.opacity = 0.7
                             } else {
@@ -240,7 +229,7 @@ PageType {
                         text: ServersModel.defaultServerName
                         horizontalAlignment: Qt.AlignHCenter
 
-                        KeyNavigation.tab: tabBar
+        //                 // KeyNavigation.tab: tabBar
 
                         Behavior on opacity {
                             PropertyAnimation { duration: 200 }
@@ -252,7 +241,7 @@ PageType {
 
                         Layout.leftMargin: 8
 
-                        visible: drawer.isCollapsed
+                        visible: drawer.isCollapsedStateActive
 
                         hoverEnabled: false
                         image: "qrc:/images/controls/chevron-down.svg"
@@ -267,12 +256,14 @@ PageType {
 
                         Keys.onEnterPressed: collapsedButtonChevron.clicked()
                         Keys.onReturnPressed: collapsedButtonChevron.clicked()
-                        Keys.onTabPressed: lastItemTabClicked()
+                        // Keys.onTabPressed: lastItemTabClicked()
 
 
                         onClicked: {
-                            if (drawer.isCollapsed) {
-                                drawer.open()
+                            console.debug("onClicked collapsedButtonChevron")
+                            if (drawer.isCollapsedStateActive()) {
+                                drawer.openTriggered()
+                                FocusController.setRootItem(drawer)
                             }
                         }
                     }
@@ -280,7 +271,7 @@ PageType {
 
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 89 : 44
+                    Layout.bottomMargin: drawer.isCollapsedStateActive ? 44 : ServersModel.isDefaultServerFromApi ? 89 : 44
                     spacing: 0
 
                     Image {
@@ -291,20 +282,20 @@ PageType {
 
                     LabelTextType {
                         id: collapsedServerMenuDescription
-                        text: drawer.isCollapsed ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
+                        text: drawer.isCollapsedStateActive ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
                     }
                 }
             }
 
-            Connections {
-                target: drawer
-                enabled: !GC.isMobile()
-                function onIsCollapsedChanged() {
-                    if (!drawer.isCollapsed) {
-                        focusItem1.forceActiveFocus()
-                    }
-                }
-            }
+            // Connections {
+            //     target: drawer
+            //     enabled: !GC.isMobile()
+            //     function onIsCollapsedChanged() {
+            //         if (!drawer.isCollapsedStateActive) {
+            //             // FocusController.reload()
+            //         }
+            //     }
+            // }
 
             ColumnLayout {
                 id: serversMenuHeader
@@ -319,10 +310,10 @@ PageType {
 
                     visible: !ServersModel.isDefaultServerFromApi
 
-                    Item {
-                        id: focusItem1
-                        KeyNavigation.tab: containersDropDown
-                    }
+                    // Item {
+                    //     id: focusItem1
+                    //     KeyNavigation.tab: containersDropDown
+                    // }
 
                     DropDownType {
                         id: containersDropDown
@@ -345,15 +336,23 @@ PageType {
                             containersDropDown.open()
                         }
 
+                        property bool isFocusable: true
+
+                        Keys.onTabPressed: {
+                            FocusController.nextKeyTabItem()
+                        }
+
                         drawerParent: root
-                        KeyNavigation.tab: serversMenuContent
+        //                 // KeyNavigation.tab: serversMenuContent
 
                         listView: HomeContainersListView {
                             id: containersListView
+                            objectName: "containersListView"
                             rootWidth: root.width
                             onVisibleChanged: {
                                 if (containersDropDown.visible && !GC.isMobile()) {
-                                    focusItem1.forceActiveFocus()
+                                    console.log(objectName, " is changing visibility...")
+                                    // FocusController.reload()
                                 }
                             }
 
@@ -399,10 +398,12 @@ PageType {
 
             ButtonGroup {
                 id: serversRadioButtonGroup
+                objectName: "serversRadioButtonGroup"
             }
 
             ListView {
                 id: serversMenuContent
+                objectName: "serversMenuContent"
 
                 anchors.top: serversMenuHeader.bottom
                 anchors.right: parent.right
@@ -418,19 +419,28 @@ PageType {
                     policy: serversMenuContent.height >= serversMenuContent.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
                 }
 
+                property bool isFocusable: true
 
-                activeFocusOnTab: true
-                focus: true
-
-                property int focusItemIndex: 0
-                onActiveFocusChanged: {
-                    if (activeFocus) {
-                        serversMenuContent.focusItemIndex = 0
-                        serversMenuContent.itemAtIndex(focusItemIndex).forceActiveFocus()
-                    }
+                Keys.onTabPressed: {
+                    FocusController.nextKeyTabItem()
                 }
 
+                // activeFocusOnTab: true
+                // focus: true
+
+                property int focusItemIndex: 0
+                // onActiveFocusChanged: {
+                //     console.debug("===>> serversMenuContent activeFocusChanged")
+
+                //     if (activeFocus) {
+                //         serversMenuContent.focusItemIndex = 0
+                //         serversMenuContent.itemAtIndex(focusItemIndex).forceActiveFocus()
+                //     }
+                // }
+
                 onFocusItemIndexChanged: {
+                    console.debug("===>> serversMenuContent onFocusItemIndexChanged")
+
                     const focusedElement = serversMenuContent.itemAtIndex(focusItemIndex)
                     if (focusedElement) {
                         if (focusedElement.y + focusedElement.height > serversMenuContent.height) {
@@ -444,16 +454,16 @@ PageType {
                 Keys.onUpPressed: scrollBar.decrease()
                 Keys.onDownPressed: scrollBar.increase()
 
-                Connections {
-                    target: drawer
-                    enabled: !GC.isMobile()
-                    function onIsCollapsedChanged() {
-                        if (drawer.isCollapsed) {
-                            const item = serversMenuContent.itemAtIndex(serversMenuContent.focusItemIndex)
-                            if (item) { item.serverRadioButtonProperty.focus = false }
-                        }
-                    }
-                }
+                // Connections {
+                //     target: drawer
+                //     enabled: !GC.isMobile()
+                //     function onIsCollapsedChanged() {
+                //         if (drawer.isCollapsedStateActive) {
+                //             const item = serversMenuContent.itemAtIndex(serversMenuContent.focusItemIndex)
+                //             if (item) { item.serverRadioButtonProperty.focus = false }
+                //         }
+                //     }
+                // }
 
                 Connections {
                     target: ServersModel
@@ -466,21 +476,31 @@ PageType {
 
                 delegate: Item {
                     id: menuContentDelegate
+                    objectName: "menuContentDelegate"
 
                     property variant delegateData: model
                     property VerticalRadioButton serverRadioButtonProperty: serverRadioButton
+
+                    property bool isFocusable: true
+
+                    Keys.onTabPressed: {
+                        FocusController.nextKeyTabItem()
+                    }
 
                     implicitWidth: serversMenuContent.width
                     implicitHeight: serverRadioButtonContent.implicitHeight
 
                     onActiveFocusChanged: {
+                        console.debug("===>> menuContentDelegate activeFocusChanged")
+
                         if (activeFocus) {
-                            serverRadioButton.forceActiveFocus()
+                            // serverRadioButton.forceActiveFocus()
                         }
                     }
 
                     ColumnLayout {
                         id: serverRadioButtonContent
+                        objectName: "serverRadioButtonContent"
 
                         anchors.fill: parent
                         anchors.rightMargin: 16
@@ -492,6 +512,7 @@ PageType {
                             Layout.fillWidth: true
                             VerticalRadioButton {
                                 id: serverRadioButton
+                                objectName: "serverRadioButton"
 
                                 Layout.fillWidth: true
 
@@ -502,6 +523,8 @@ PageType {
                                 checkable: !ConnectionController.isConnected
 
                                 ButtonGroup.group: serversRadioButtonGroup
+
+                                property bool isFocusable: true
 
                                 onClicked: {
                                     if (ConnectionController.isConnected) {
@@ -520,37 +543,49 @@ PageType {
                                     enabled: false
                                 }
 
-                                Keys.onTabPressed: serverInfoButton.forceActiveFocus()
+                                // Keys.onTabPressed: serverInfoButton.forceActiveFocus()
                                 Keys.onEnterPressed: serverRadioButton.clicked()
                                 Keys.onReturnPressed: serverRadioButton.clicked()
                             }
 
                             ImageButtonType {
                                 id: serverInfoButton
+                                objectName: "serverInfoButton"
+
                                 image: "qrc:/images/controls/settings.svg"
                                 imageColor: AmneziaStyle.color.paleGray
 
                                 implicitWidth: 56
                                 implicitHeight: 56
 
-                                z: 1
+                                property bool isFocusable: true
 
                                 Keys.onTabPressed: {
-                                    if (serversMenuContent.focusItemIndex < serversMenuContent.count - 1) {
-                                        serversMenuContent.focusItemIndex++
-                                        serversMenuContent.itemAtIndex(serversMenuContent.focusItemIndex).forceActiveFocus()
-                                    } else {
-                                        focusItem1.forceActiveFocus()
-                                        serversMenuContent.contentY = 0
-                                    }
+                                    FocusController.nextKeyTabItem()
                                 }
+
+                                z: 1
+                                onActiveFocusChanged: {
+                                    console.debug("===>> serverInfoButton activeFocusChanged")
+                                }
+                                // Keys.onTabPressed: {
+                                //     if (serversMenuContent.focusItemIndex < serversMenuContent.count - 1) {
+                                //         serversMenuContent.focusItemIndex++
+                                //         serversMenuContent.itemAtIndex(serversMenuContent.focusItemIndex).forceActiveFocus()
+                                //     } else {
+                                //         focusItem1.forceActiveFocus()
+                                //         serversMenuContent.contentY = 0
+                                //     }
+                                // }
                                 Keys.onEnterPressed: serverInfoButton.clicked()
                                 Keys.onReturnPressed: serverInfoButton.clicked()
 
                                 onClicked: function() {
+                                    console.debug("===>> onClicked serverInfoButton")
+
                                     ServersModel.processedIndex = index
                                     PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                                    drawer.close()
+                                    drawer.closeTriggered()
                                 }
                             }
                         }

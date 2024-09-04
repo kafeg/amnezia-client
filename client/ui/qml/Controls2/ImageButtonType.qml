@@ -24,8 +24,8 @@ Button {
     property int borderFocusedWidth: 1
 
     hoverEnabled: true
-    focus: true
-    focusPolicy: Qt.TabFocus
+    // focus: true
+    // focusPolicy: Qt.TabFocus
 
     icon.source: image
     icon.color: root.enabled ? imageColor : disableImageColor
@@ -38,6 +38,16 @@ Button {
                 root.parentFlickable.ensureVisible(this)
             }
         }
+    }
+
+    property bool isFocusable: true
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
     }
 
     Behavior on icon.color {

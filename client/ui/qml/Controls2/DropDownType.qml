@@ -67,11 +67,11 @@ Item {
     implicitHeight: rootButtonContent.implicitHeight
 
     onOpen: {
-        menu.open()
+        menu.openTriggered()
     }
 
     onClose: {
-        menu.close()
+        menu.closeTriggered()
     }
 
     Rectangle {
@@ -173,7 +173,7 @@ Item {
             if (rootButtonClickedFunction && typeof rootButtonClickedFunction === "function") {
                 rootButtonClickedFunction()
             } else {
-                menu.open()
+                menu.openTriggered()
             }
         }
     }
@@ -218,7 +218,7 @@ Item {
                 BackButtonType {
                     id: backButton
                     backButtonImage: root.headerBackButtonImage
-                    backButtonFunction: function() { menu.close() }
+                    backButtonFunction: function() { menu.closeTriggered() }
                     KeyNavigation.tab: listViewLoader.item
                 }
             }
@@ -266,13 +266,13 @@ Item {
 
     Keys.onEnterPressed: {
         if (menu.isClosed) {
-            menu.open()
+            menu.openTriggered()
         }
     }
 
     Keys.onReturnPressed: {
         if (menu.isClosed) {
-            menu.open()
+            menu.openTriggered()
         }
     }
 }
