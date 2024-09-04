@@ -16,7 +16,7 @@ DrawerType2 {
     anchors.fill: parent
     expandedHeight: parent.height * 0.9
 
-    expandedContent: ColumnLayout {
+    expandedStateContent: ColumnLayout {
         id: content
 
         anchors.top: parent.top

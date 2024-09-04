@@ -209,7 +209,7 @@ PageType {
                         }
                     }
 
-                    expandedContent: ColumnLayout {
+                    expandedStateContent: ColumnLayout {
                         id: shareFullAccessDrawerContent
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -774,8 +774,8 @@ PageType {
 
                             anchors.fill: parent
 
-                            expandedContent: ColumnLayout {
-                                id: expandedContent
+                            expandedStateContent: ColumnLayout {
+                                id: expandedStateContent
                                 anchors.top: parent.top
                                 anchors.left: parent.left
                                 anchors.right: parent.right
@@ -786,7 +786,7 @@ PageType {
                                 spacing: 8
 
                                 onImplicitHeightChanged: {
-                                    clientInfoDrawer.expandedHeight = expandedContent.implicitHeight + 32
+                                    clientInfoDrawer.expandedHeight = expandedStateContent.implicitHeight + 32
                                 }
 
                                 Connections {
@@ -881,7 +881,7 @@ PageType {
                                             }
                                         }
 
-                                        expandedContent: ColumnLayout {
+                                        expandedStateContent: ColumnLayout {
                                             anchors.top: parent.top
                                             anchors.left: parent.left
                                             anchors.right: parent.right

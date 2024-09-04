@@ -18,8 +18,8 @@ Item {
     readonly property bool isExpanded: drawerContent.state === root.drawerExpanded
     readonly property bool isCollapsed: drawerContent.state === root.drawerCollapsed
 
-    property Component collapsedContent
-    property Component expandedContent
+    property Component collapsedStateContent
+    property Component expandedStateContent
 
     property string defaultColor: AmneziaStyle.color.onyxBlack
     property string borderColor: AmneziaStyle.color.slateGray
@@ -241,7 +241,7 @@ Item {
         Loader {
             id: collapsedLoader
 
-            sourceComponent: root.collapsedContent
+            sourceComponent: root.collapsedStateContent
 
             anchors.right: parent.right
             anchors.left: parent.left
@@ -251,7 +251,7 @@ Item {
             id: expandedLoader
 
             visible: root.isExpanded
-            sourceComponent: root.expandedContent
+            sourceComponent: root.expandedStateContent
 
             anchors.right: parent.right
             anchors.left: parent.left

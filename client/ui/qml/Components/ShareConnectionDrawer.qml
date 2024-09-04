@@ -36,7 +36,7 @@ DrawerType2 {
         configFileName = "amnezia_config"
     }
 
-    expandedContent: Item {
+    expandedStateContent: Item {
         implicitHeight: root.expandedHeight
 
         Connections {
@@ -184,7 +184,7 @@ DrawerType2 {
                         }
                     }
 
-                    expandedContent: Item {
+                    expandedStateContent: Item {
                         id: configContentContainer
 
                         implicitHeight: configContentDrawer.expandedHeight
