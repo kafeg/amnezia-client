@@ -133,6 +133,10 @@ void FocusController::nextKeyTabItem()
 {
     reload();
 
+    if(m_focus_chain.empty()) {
+        return;
+    }
+
     if (m_focused_item_index == (m_focus_chain.size() - 1) || m_focused_item_index == -1) {
         m_focused_item_index = 0;
     } else {
@@ -148,6 +152,10 @@ void FocusController::nextKeyTabItem()
 void FocusController::previousKeyTabItem()
 {
     reload();
+
+    if(m_focus_chain.empty()) {
+        return;
+    }
 
     if (m_focused_item_index <= 0) {
         m_focused_item_index = m_focus_chain.size() - 1;
@@ -287,6 +295,7 @@ void FocusController::reload()
     if (m_focus_chain.empty()) {
         m_focused_item_index = -1;
         qWarning() << "reloaded to empty focus chain";
+        return;
     }
 
     QQuickWindow* window = qobject_cast<QQuickWindow*>(rootObjects[0]);

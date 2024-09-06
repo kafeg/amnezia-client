@@ -150,6 +150,8 @@ PageType {
         }
 
         collapsedStateContent: Item {
+            objectName: "ProtocolDrawerCollapsedContent"
+
             implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
             Component.onCompleted: {
                 drawer.expandedHeight = implicitHeight
@@ -165,6 +167,7 @@ PageType {
             }
             ColumnLayout {
                 id: collapsed
+                objectName: "collapsedColumnLayout"
 
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -182,6 +185,8 @@ PageType {
                 }
 
                 RowLayout {
+                    objectName: "rowLayout"
+
                     Layout.topMargin: 14
                     Layout.leftMargin: 24
                     Layout.rightMargin: 24
@@ -221,6 +226,8 @@ PageType {
 
                     Header1TextType {
                         id: collapsedButtonHeader
+                        objectName: "collapsedButtonHeader"
+
                         Layout.maximumWidth: drawer.width - 48 - 18 - 12
 
                         maximumLineCount: 2
@@ -238,10 +245,11 @@ PageType {
 
                     ImageButtonType {
                         id: collapsedButtonChevron
+                        objectName: "collapsedButtonChevron"
 
                         Layout.leftMargin: 8
 
-                        visible: drawer.isCollapsedStateActive
+                        visible: drawer.isCollapsedStateActive()
 
                         hoverEnabled: false
                         image: "qrc:/images/controls/chevron-down.svg"
@@ -270,6 +278,7 @@ PageType {
                 }
 
                 RowLayout {
+                    objectName: "rowLayoutLabel"
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     Layout.bottomMargin: drawer.isCollapsedStateActive ? 44 : ServersModel.isDefaultServerFromApi ? 89 : 44
                     spacing: 0
@@ -299,6 +308,7 @@ PageType {
 
             ColumnLayout {
                 id: serversMenuHeader
+                objectName: "serversMenuHeader"
 
                 anchors.top: collapsed.bottom
                 anchors.right: parent.right
@@ -317,6 +327,7 @@ PageType {
 
                     DropDownType {
                         id: containersDropDown
+                        objectName: "containersDropDown"
 
                         rootButtonImageColor: AmneziaStyle.color.midnightBlack
                         rootButtonBackgroundColor: AmneziaStyle.color.paleGray
@@ -348,6 +359,7 @@ PageType {
                         listView: HomeContainersListView {
                             id: containersListView
                             objectName: "containersListView"
+                            
                             rootWidth: root.width
                             onVisibleChanged: {
                                 if (containersDropDown.visible && !GC.isMobile()) {
@@ -429,14 +441,14 @@ PageType {
                 // focus: true
 
                 property int focusItemIndex: 0
-                // onActiveFocusChanged: {
-                //     console.debug("===>> serversMenuContent activeFocusChanged")
+                onActiveFocusChanged: {
+                    console.debug("===>> serversMenuContent activeFocusChanged")
 
-                //     if (activeFocus) {
-                //         serversMenuContent.focusItemIndex = 0
-                //         serversMenuContent.itemAtIndex(focusItemIndex).forceActiveFocus()
-                //     }
-                // }
+                    if (activeFocus) {
+                        serversMenuContent.focusItemIndex = 0
+                        serversMenuContent.itemAtIndex(focusItemIndex).forceActiveFocus()
+                    }
+                }
 
                 onFocusItemIndexChanged: {
                     console.debug("===>> serversMenuContent onFocusItemIndexChanged")

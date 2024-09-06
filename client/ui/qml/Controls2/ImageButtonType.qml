@@ -32,13 +32,13 @@ Button {
 
     property Flickable parentFlickable
 
-    onFocusChanged: {
-        if (root.activeFocus) {
-            if (root.parentFlickable) {
-                root.parentFlickable.ensureVisible(this)
-            }
-        }
-    }
+    // onFocusChanged: {
+    //     if (root.activeFocus) {
+    //         if (root.parentFlickable) {
+    //             root.parentFlickable.ensureVisible(this)
+    //         }
+    //     }
+    // }
 
     property bool isFocusable: true
 
